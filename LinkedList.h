@@ -74,23 +74,24 @@ public:
         length_ = 0;
     }
 
-    T GetFirst() const {
+    const T& GetFirst() const {
         if (length_ == 0) {
             throw IndexOutOfRange();
         }
         return head_->data;
     }
 
-    T GetLast() const {
+    const T& GetLast() const {
         if (length_ == 0) {
             throw IndexOutOfRange();
         }
         return tail_->data;
     }
 
-    T Get(int index) const {
+    const T& Get(int index) const {
         return GetNode(index)->data;
     }
+
 
     int GetLength() const {
         return length_;
@@ -151,4 +152,16 @@ public:
         }
         return result;
     }
+
+    T& operator[](int index){
+        if (index < 0 || index >= length_) {
+            throw IndexOutOfRange();
+        }
+        Node* cur = head_;
+        for (int i = 0; i < index; ++i) {
+            cur = cur->next;
+        }
+        return cur->data;
+    }
+
 };

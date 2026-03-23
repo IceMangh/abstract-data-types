@@ -67,10 +67,11 @@ public:
         delete[] data_;
     }
 
-    T Get(int index) const {
+    const T& Get(int index) const {
         CheckIndex(index);
         return data_[index];
     }
+
 
     int GetSize() const {
         return size_;
@@ -99,4 +100,12 @@ public:
         data_ = newData;
         size_ = newSize;
     }
+
+    T& operator[](int index) {
+        CheckIndex(index);
+        return data_[index];
+    }
+
 };
+
+

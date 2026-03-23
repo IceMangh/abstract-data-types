@@ -1,6 +1,8 @@
 #pragma once
 #include "DynamicArray.h"
 #include "Sequence.h"
+#include "SequenceEnumerator.h"
+#include "Exceptions.h"
 
 template <class T>
 class ArraySequence : public Sequence<T> {
@@ -16,15 +18,15 @@ public:
 
     ArraySequence(const ArraySequence<T>& other) : items_(other.items_) {}
 
-    T GetFirst() const override {
+    const T& GetFirst() const override {
         return items_.Get(0);
     }
 
-    T GetLast() const override {
+    const T& GetLast() const override {
         return items_.Get(items_.GetSize() - 1);
     }
 
-    T Get(int index) const override {
+    const T& Get(int index) const override {
         return items_.Get(index);
     }
 
@@ -36,49 +38,68 @@ public:
         if (startIndex < 0 || endIndex < 0 || startIndex >= GetLength() || endIndex >= GetLength() || startIndex > endIndex) {
             throw IndexOutOfRange();
         }
+
         int newLen = endIndex - startIndex + 1;
         DynamicArray<T> temp(newLen);
         for (int i = 0; i < newLen; ++i) {
             temp.Set(i, items_.Get(startIndex + i));
         }
+
         return new ArraySequence<T>(temp);
     }
 
-    Sequence<T>* Append(const T& item) override {
+    Sequence<T>& Append(const T& item) override {
         int oldSize = items_.GetSize();
         items_.Resize(oldSize + 1);
         items_.Set(oldSize, item);
-        return this;
+        return *this;
     }
 
-    Sequence<T>* Prepend(const T& item) override {
+    Sequence<T>& Prepend(const T& item) override {
         int oldSize = items_.GetSize();
         items_.Resize(oldSize + 1);
         for (int i = oldSize; i > 0; --i) {
             items_.Set(i, items_.Get(i - 1));
         }
         items_.Set(0, item);
-        return this;
+        return *this;
     }
 
-    Sequence<T>* InsertAt(const T& item, int index) override {
+    Sequence<T>& InsertAt(const T& item, int index) override {
         if (index < 0 || index > GetLength()) {
             throw IndexOutOfRange();
         }
+
         int oldSize = items_.GetSize();
         items_.Resize(oldSize + 1);
         for (int i = oldSize; i > index; --i) {
             items_.Set(i, items_.Get(i - 1));
         }
         items_.Set(index, item);
-        return this;
+        return *this;
     }
 
-    Sequence<T>* Concat(const Sequence<T>* other) const override {
+    Sequence<T>* Concat(const Sequence<T>& other) const override {
         ArraySequence<T>* result = new ArraySequence<T>(*this);
-        for (int i = 0; i < other->GetLength(); ++i) {
-            result->Append(other->Get(i));
+        for (int i = 0; i < other.GetLength(); ++i) {
+            result->Append(other.Get(i));
         }
         return result;
+    }
+
+    Sequence<T>* Clone() const override {
+        return new ArraySequence<T>(*this);
+    }
+
+    Sequence<T>* CreateEmpty() const override {
+        return new ArraySequence<T>();
+    }
+
+    static ArraySequence<T> From(const T* items, int count) {
+        return ArraySequence<T>(items, count);
+    }
+
+    IEnumerator<T>* GetEnumerator() const override {
+        return new SequenceEnumerator<T>(*this);
     }
 };

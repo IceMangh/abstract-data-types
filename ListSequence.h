@@ -1,6 +1,7 @@
 #pragma once
 #include "LinkedList.h"
 #include "Sequence.h"
+#include "SequenceEnumerator.h"
 
 template <class T>
 class ListSequence : public Sequence<T> {
@@ -16,15 +17,15 @@ public:
 
     ListSequence(const ListSequence<T>& other) : items_(other.items_) {}
 
-    T GetFirst() const override {
+    const T& GetFirst() const override {
         return items_.GetFirst();
     }
 
-    T GetLast() const override {
+    const T& GetLast() const override {
         return items_.GetLast();
     }
 
-    T Get(int index) const override {
+    const T& Get(int index) const override {
         return items_.Get(index);
     }
 
@@ -39,26 +40,42 @@ public:
         return result;
     }
 
-    Sequence<T>* Append(const T& item) override {
+    Sequence<T>& Append(const T& item) override {
         items_.Append(item);
-        return this;
+        return *this;
     }
 
-    Sequence<T>* Prepend(const T& item) override {
+    Sequence<T>& Prepend(const T& item) override {
         items_.Prepend(item);
-        return this;
+        return *this;
     }
 
-    Sequence<T>* InsertAt(const T& item, int index) override {
+    Sequence<T>& InsertAt(const T& item, int index) override {
         items_.InsertAt(item, index);
-        return this;
+        return *this;
     }
 
-    Sequence<T>* Concat(const Sequence<T>* other) const override {
+    Sequence<T>* Concat(const Sequence<T>& other) const override {
         ListSequence<T>* result = new ListSequence<T>(*this);
-        for (int i = 0; i < other->GetLength(); ++i) {
-            result->Append(other->Get(i));
+        for (int i = 0; i < other.GetLength(); ++i) {
+            result->Append(other.Get(i));
         }
         return result;
+    }
+
+    Sequence<T>* Clone() const override {
+        return new ListSequence<T>(*this);
+    }
+
+    Sequence<T>* CreateEmpty() const override {
+        return new ListSequence<T>();
+    }
+
+    static ListSequence<T> From(const T* items, int count) {
+        return ListSequence<T>(items, count);
+    }
+
+    IEnumerator<T>* GetEnumerator() const override {
+        return new SequenceEnumerator<T>(*this);
     }
 };
