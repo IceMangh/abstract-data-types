@@ -83,17 +83,6 @@ void ShowAlgorithms(const Sequence<int>& seq) {
     }
 }
 
-void ShowAlgorithms(const ImmutableArraySequence<int>& seq) {
-    ImmutableArraySequence<int> mapped = seq.Map(Double);
-    PrintSequence(mapped, "Map(x2)");
-
-    std::cout << "Reduce(sum): " << seq.Reduce(Sum, 0) << '\n';
-
-    if (seq.GetLength() >= 2) {
-        PrintSequence(seq.GetSubsequence(0, seq.GetLength() - 2), "Subsequence(0, n-2)");
-    }
-}
-
 void DemoMutableArraySequence() {
     std::cout << "\n=== Mutable ArraySequence ===\n";
     ArraySequence<int> sequence = BuildSequence<ArraySequence<int>>(ReadElements());
@@ -123,51 +112,31 @@ void DemoImmutableArraySequence() {
     PrintSequence(original, "Исходная последовательность");
 
     const int appendValue = ReadInt("Значение для Append: ");
-    ImmutableArraySequence<int> appended = original.Append(appendValue);
+    Sequence<int>* appended = original.Append(appendValue);
     PrintSequence(original, "Исходный объект после Append");
-    PrintSequence(appended, "Новый объект после Append");
+    PrintSequence(*appended, "Новый объект после Append");
 
     const int prependValue = ReadInt("Значение для Prepend: ");
-    ImmutableArraySequence<int> prepended = appended.Prepend(prependValue);
-    PrintSequence(appended, "Предыдущий объект после Prepend");
-    PrintSequence(prepended, "Новый объект после Prepend");
+    Sequence<int>* prepended = appended->Prepend(prependValue);
+    PrintSequence(*appended, "Предыдущий объект после Prepend");
+    PrintSequence(*prepended, "Новый объект после Prepend");
 
     const int insertValue = ReadInt("Значение для InsertAt: ");
-    const int insertIndex = ReadInt("Индекс для InsertAt (0.." + std::to_string(prepended.GetLength()) + "): ");
-    ImmutableArraySequence<int> inserted = prepended.InsertAt(insertValue, insertIndex);
-    PrintSequence(prepended, "Предыдущий объект после InsertAt");
-    PrintSequence(inserted, "Новый объект после InsertAt");
+    const int insertIndex = ReadInt("Индекс для InsertAt (0.." + std::to_string(prepended->GetLength()) + "): ");
+    Sequence<int>* inserted = prepended->InsertAt(insertValue, insertIndex);
+    PrintSequence(*prepended, "Предыдущий объект после InsertAt");
+    PrintSequence(*inserted, "Новый объект после InsertAt");
 
-    PrintCommonInfo(inserted);
-    ShowAlgorithms(inserted);
+    PrintCommonInfo(*inserted);
+    ShowAlgorithms(*inserted);
     std::cout << "Вывод: immutable-версия не меняет исходный объект, а возвращает новую последовательность.\n";
+
+    delete appended;
+    delete prepended;
+    delete inserted;
 }
 
-void CompareMutableAndImmutableArraySequence() {
-    std::cout << "\n=== Сравнение Mutable и Immutable ===\n";
-    const std::vector<int> values = ReadElements();
 
-    const int appendValue = ReadInt("Общее значение для Append: ");
-    const int prependValue = ReadInt("Общее значение для Prepend: ");
-    const int insertValue = ReadInt("Общее значение для InsertAt: ");
-    const int insertIndex = ReadInt(
-            "Общий индекс для InsertAt после Append и Prepend (0.." + std::to_string(static_cast<int>(values.size()) + 2) + "): ");
-
-    ArraySequence<int> mutableSequence = BuildSequence<ArraySequence<int>>(values);
-    ImmutableArraySequence<int> immutableSequence = BuildSequence<ImmutableArraySequence<int>>(values);
-
-    mutableSequence.Append(appendValue).Prepend(prependValue).InsertAt(insertValue, insertIndex);
-    ImmutableArraySequence<int> immutableResult =
-            immutableSequence.Append(appendValue).Prepend(prependValue).InsertAt(insertValue, insertIndex);
-
-    PrintSequence(mutableSequence, "Mutable после операций");
-    PrintSequence(immutableSequence, "Immutable исходный объект");
-    PrintSequence(immutableResult, "Immutable новый объект");
-
-    std::cout << "Сравнение:\n";
-    std::cout << "1. Mutable хранит изменения в том же объекте.\n";
-    std::cout << "2. Immutable сохраняет исходное состояние и строит новый результат.\n";
-}
 
 void DemoMutableListSequence() {
     std::cout << "\n=== Mutable ListSequence ===\n";
@@ -197,8 +166,7 @@ void PrintMenu() {
     std::cout << "1. Запустить тесты\n";
     std::cout << "2. Демонстрация mutable ArraySequence\n";
     std::cout << "3. Демонстрация immutable ArraySequence\n";
-    std::cout << "4. Сравнить mutable и immutable ArraySequence\n";
-    std::cout << "5. Демонстрация mutable ListSequence\n";
+    std::cout << "4. Демонстрация mutable ListSequence\n";
     std::cout << "0. Выход\n";
 }
 
@@ -221,9 +189,6 @@ int main() {
                     DemoImmutableArraySequence();
                     break;
                 case 4:
-                    CompareMutableAndImmutableArraySequence();
-                    break;
-                case 5:
                     DemoMutableListSequence();
                     break;
                 case 0:

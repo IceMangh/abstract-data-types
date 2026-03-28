@@ -4,6 +4,7 @@ project(atd)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(atd main.cpp
+        ArraySequenceBase.h
         ArraySequence.h
         DynamicArray.h
         Exceptions.h

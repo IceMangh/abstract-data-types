@@ -47,7 +47,7 @@ inline void TestLinkedList() {
 inline void TestArraySequence() {
     int data[] = {1, 2, 3};
     ArraySequence<int> seq(data, 3);
-    seq.Append(4).Prepend(0).InsertAt(99, 2);
+    seq.Append(4)->Prepend(0)->InsertAt(99, 2);
     assert(seq.GetFirst() == 0);
     assert(seq.Get(2) == 99);
     assert(seq.GetLast() == 4);
@@ -95,7 +95,7 @@ void TestArraySequenceReduce() {
 inline void TestListSequence() {
     int data[] = {1, 2, 3};
     ListSequence<int> seq(data, 3);
-    seq.Append(4).Prepend(0).InsertAt(99, 2);
+    seq.Append(4)->Prepend(0)->InsertAt(99, 2);
     assert(seq.GetFirst() == 0);
     assert(seq.Get(2) == 99);
     assert(seq.GetLast() == 4);
@@ -177,48 +177,56 @@ inline void TestImmutableArraySequence() {
     int data[] = {1, 2, 3};
     ImmutableArraySequence<int> original(data, 3);
 
-    ImmutableArraySequence<int> appended = original.Append(4);
-    ImmutableArraySequence<int> prepended = original.Prepend(0);
-    ImmutableArraySequence<int> inserted = original.InsertAt(99, 1);
+    Sequence<int>* appended = original.Append(4);
+    Sequence<int>* prepended = original.Prepend(0);
+    Sequence<int>* inserted = original.InsertAt(99, 1);
 
     assert(original.GetLength() == 3);
     assert(original.Get(0) == 1);
     assert(original.Get(1) == 2);
     assert(original.Get(2) == 3);
 
-    assert(appended.GetLength() == 4);
-    assert(appended.GetLast() == 4);
+    assert(appended->GetLength() == 4);
+    assert(appended->GetLast() == 4);
 
-    assert(prepended.GetLength() == 4);
-    assert(prepended.GetFirst() == 0);
+    assert(prepended->GetLength() == 4);
+    assert(prepended->GetFirst() == 0);
 
-    assert(inserted.GetLength() == 4);
-    assert(inserted.Get(1) == 99);
-    assert(inserted.Get(2) == 2);
+    assert(inserted->GetLength() == 4);
+    assert(inserted->Get(1) == 99);
+    assert(inserted->Get(2) == 2);
+
+    delete appended;
+    delete prepended;
+    delete inserted;
 }
 
 inline void TestImmutableArraySequenceMapReduce() {
     int data[] = {1, 2, 3, 4};
     ImmutableArraySequence<int> seq(data, 4);
 
-    ImmutableArraySequence<int> mapped = seq.Map(Double);
-    ImmutableArraySequence<int> sub = seq.GetSubsequence(1, 2);
-    ImmutableArraySequence<int> joined = seq + sub;
+    Sequence<int>* mapped = seq.Map(Double);
+    Sequence<int>* sub = seq.GetSubsequence(1, 2);
+    Sequence<int>* joined = seq + *sub;
 
-    assert(mapped.GetLength() == 4);
-    assert(mapped.Get(0) == 2);
-    assert(mapped.Get(3) == 8);
+    assert(mapped->GetLength() == 4);
+    assert(mapped->Get(0) == 2);
+    assert(mapped->Get(3) == 8);
 
-    assert(sub.GetLength() == 2);
-    assert(sub.Get(0) == 2);
-    assert(sub.Get(1) == 3);
+    assert(sub->GetLength() == 2);
+    assert(sub->Get(0) == 2);
+    assert(sub->Get(1) == 3);
 
-    assert(joined.GetLength() == 6);
-    assert(joined.Get(4) == 2);
-    assert(joined.Get(5) == 3);
+    assert(joined->GetLength() == 6);
+    assert(joined->Get(4) == 2);
+    assert(joined->Get(5) == 3);
 
     assert(seq.Reduce(Sum, 0) == 10);
     assert(seq.Reduce(Multiply, 1) == 24);
+
+    delete mapped;
+    delete sub;
+    delete joined;
 }
 
 inline void TestMutableVsImmutableDifference() {
@@ -227,15 +235,17 @@ inline void TestMutableVsImmutableDifference() {
     ImmutableArraySequence<int> immutableSeq(data, 3);
 
     mutableSeq.Append(10);
-    ImmutableArraySequence<int> immutableResult = immutableSeq.Append(10);
+    Sequence<int>* immutableResult = immutableSeq.Append(10);
 
     assert(mutableSeq.GetLength() == 4);
     assert(mutableSeq.GetLast() == 10);
 
     assert(immutableSeq.GetLength() == 3);
     assert(immutableSeq.GetLast() == 3);
-    assert(immutableResult.GetLength() == 4);
-    assert(immutableResult.GetLast() == 10);
+    assert(immutableResult->GetLength() == 4);
+    assert(immutableResult->GetLast() == 10);
+
+    delete immutableResult;
 }
 
 inline void RunAllTests() {

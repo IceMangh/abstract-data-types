@@ -40,27 +40,27 @@ public:
         return result;
     }
 
-    Sequence<T>& Append(const T& item) override {
+    Sequence<T>* Append(const T& item) override {
         items_.Append(item);
-        return *this;
+        return this;
     }
 
-    Sequence<T>& Prepend(const T& item) override {
+    Sequence<T>* Prepend(const T& item) override {
         items_.Prepend(item);
-        return *this;
+        return this;
     }
 
-    Sequence<T>& InsertAt(const T& item, int index) override {
+    Sequence<T>* InsertAt(const T& item, int index) override {
         items_.InsertAt(item, index);
-        return *this;
+        return this;
     }
 
     Sequence<T>* Concat(const Sequence<T>& other) const override {
-        ListSequence<T>* result = new ListSequence<T>(*this);
+        std::unique_ptr<Sequence<T>> result(this->Clone());
         for (int i = 0; i < other.GetLength(); ++i) {
-            result->Append(other.Get(i));
+            this->AppendToResult(result, other.Get(i));
         }
-        return result;
+        return result.release();
     }
 
     Sequence<T>* Clone() const override {

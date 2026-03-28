@@ -5,6 +5,18 @@
 
 template <class T>
 class Sequence : public IEnumerable<T>, public ICollection<T> {
+protected:
+    void AppendToResult(std::unique_ptr<Sequence<T>>& result, const T& item) const {
+        Sequence<T>* current = result.get();
+        Sequence<T>* updated = current->Append(item);
+
+        if (updated != current) {
+            result.release();
+            delete current;
+            result.reset(updated);
+        }
+    }
+
 public:
     virtual ~Sequence() = default;
 
@@ -18,9 +30,9 @@ public:
     }
 
     virtual Sequence<T>* GetSubsequence(int startIndex, int endIndex) const = 0;
-    virtual Sequence<T>& Append(const T& item) = 0;
-    virtual Sequence<T>& Prepend(const T& item) = 0;
-    virtual Sequence<T>& InsertAt(const T& item, int index) = 0;
+    virtual Sequence<T>* Append(const T& item) = 0;
+    virtual Sequence<T>* Prepend(const T& item) = 0;
+    virtual Sequence<T>* InsertAt(const T& item, int index) = 0;
     virtual Sequence<T>* Concat(const Sequence<T>& other) const = 0;
 
     virtual Sequence<T>* Clone() const override = 0;
@@ -32,7 +44,7 @@ public:
         std::unique_ptr<IEnumerator<T>> enumerator(this->GetEnumerator());
 
         while (enumerator->MoveNext()) {
-            result->Append(mapper(enumerator->Current()));
+            AppendToResult(result, mapper(enumerator->Current()));
         }
 
         return result.release();
