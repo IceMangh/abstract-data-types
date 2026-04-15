@@ -6,15 +6,10 @@
 template <class T>
 class Sequence : public IEnumerable<T>, public ICollection<T> {
 protected:
-    void AppendToResult(std::unique_ptr<Sequence<T>>& result, const T& item) const {
-        Sequence<T>* current = result.get();
-        Sequence<T>* updated = current->Append(item);
+    virtual void AppendInPlace(const T& item) = 0;
 
-        if (updated != current) {
-            result.release();
-            delete current;
-            result.reset(updated);
-        }
+    void AppendToResult(std::unique_ptr<Sequence<T>>& result, const T& item) const {
+        result->AppendInPlace(item);
     }
 
 public:

@@ -3,9 +3,10 @@
 #include <string>
 #include <vector>
 
-#include "ArraySequence.h"
+#include "MutableArraySequence.h"
 #include "ImmutableArraySequence.h"
-#include "ListSequence.h"
+#include "MutableListSequence.h"
+#include "ImmutableListSequence.h"
 #include "Tests.h"
 
 int ReadInt(const std::string& prompt) {
@@ -85,7 +86,7 @@ void ShowAlgorithms(const Sequence<int>& seq) {
 
 void DemoMutableArraySequence() {
     std::cout << "\n=== Mutable ArraySequence ===\n";
-    ArraySequence<int> sequence = BuildSequence<ArraySequence<int>>(ReadElements());
+    MutableArraySequence<int> sequence = BuildSequence<MutableArraySequence<int>>(ReadElements());
     PrintSequence(sequence, "Исходная последовательность");
 
     const int appendValue = ReadInt("Значение для Append: ");
@@ -140,7 +141,7 @@ void DemoImmutableArraySequence() {
 
 void DemoMutableListSequence() {
     std::cout << "\n=== Mutable ListSequence ===\n";
-    ListSequence<int> sequence = BuildSequence<ListSequence<int>>(ReadElements());
+    MutableListSequence<int> sequence = BuildSequence<MutableListSequence<int>>(ReadElements());
     PrintSequence(sequence, "Исходная последовательность");
 
     const int appendValue = ReadInt("Значение для Append: ");
@@ -158,7 +159,37 @@ void DemoMutableListSequence() {
 
     PrintCommonInfo(sequence);
     ShowAlgorithms(sequence);
-    std::cout << "Вывод: ListSequence в этом проекте реализована как mutable-структура.\n";
+    std::cout << "Вывод: mutable-версия меняет исходный объект.\n";
+}
+
+void DemoImmutableListSequence() {
+    std::cout << "\n=== Immutable ListSequence ===\n";
+    ImmutableListSequence<int> original = BuildSequence<ImmutableListSequence<int>>(ReadElements());
+    PrintSequence(original, "Исходная последовательность");
+
+    const int appendValue = ReadInt("Значение для Append: ");
+    Sequence<int>* appended = original.Append(appendValue);
+    PrintSequence(original, "Исходный объект после Append");
+    PrintSequence(*appended, "Новый объект после Append");
+
+    const int prependValue = ReadInt("Значение для Prepend: ");
+    Sequence<int>* prepended = appended->Prepend(prependValue);
+    PrintSequence(*appended, "Предыдущий объект после Prepend");
+    PrintSequence(*prepended, "Новый объект после Prepend");
+
+    const int insertValue = ReadInt("Значение для InsertAt: ");
+    const int insertIndex = ReadInt("Индекс для InsertAt (0.." + std::to_string(prepended->GetLength()) + "): ");
+    Sequence<int>* inserted = prepended->InsertAt(insertValue, insertIndex);
+    PrintSequence(*prepended, "Предыдущий объект после InsertAt");
+    PrintSequence(*inserted, "Новый объект после InsertAt");
+
+    PrintCommonInfo(*inserted);
+    ShowAlgorithms(*inserted);
+    std::cout << "Вывод: immutable-версия не меняет исходный объект, а возвращает новую последовательность.\n";
+
+    delete appended;
+    delete prepended;
+    delete inserted;
 }
 
 void PrintMenu() {
@@ -167,6 +198,7 @@ void PrintMenu() {
     std::cout << "2. Демонстрация mutable ArraySequence\n";
     std::cout << "3. Демонстрация immutable ArraySequence\n";
     std::cout << "4. Демонстрация mutable ListSequence\n";
+    std::cout << "5. Демонстрация immutable ListSequence\n";
     std::cout << "0. Выход\n";
 }
 
@@ -190,6 +222,9 @@ int main() {
                     break;
                 case 4:
                     DemoMutableListSequence();
+                    break;
+                case 5:
+                    DemoImmutableListSequence();
                     break;
                 case 0:
                     isRunning = false;

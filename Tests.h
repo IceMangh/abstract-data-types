@@ -3,9 +3,10 @@
 #include <iostream>
 #include "DynamicArray.h"
 #include "LinkedList.h"
-#include "ArraySequence.h"
+#include "MutableArraySequence.h"
 #include "ImmutableArraySequence.h"
-#include "ListSequence.h"
+#include "MutableListSequence.h"
+#include "ImmutableListSequence.h"
 
 int Double(int x) {
     return x * 2;
@@ -46,7 +47,7 @@ inline void TestLinkedList() {
 
 inline void TestArraySequence() {
     int data[] = {1, 2, 3};
-    ArraySequence<int> seq(data, 3);
+    MutableArraySequence<int> seq(data, 3);
     seq.Append(4)->Prepend(0)->InsertAt(99, 2);
     assert(seq.GetFirst() == 0);
     assert(seq.Get(2) == 99);
@@ -60,7 +61,7 @@ inline void TestArraySequence() {
 
 inline void TestArraySequenceMap() {
     int data[] = {1, 2, 32};
-    ArraySequence<int> seq(data, 3);
+    MutableArraySequence<int> seq(data, 3);
     Sequence<int>* mapped = seq.Map(Double);
 
     assert(mapped->GetLength() == 3);
@@ -73,7 +74,7 @@ inline void TestArraySequenceMap() {
 inline void TestArraySequenceFrom() {
     int data[] = {1, 2, 3};
 
-    ArraySequence<int> seq = ArraySequence<int>::From(data, 3);
+    MutableArraySequence<int> seq = MutableArraySequence<int>::From(data, 3);
 
     assert(seq.GetLength() == 3);
     assert(seq.Get(0) == 1);
@@ -83,7 +84,7 @@ inline void TestArraySequenceFrom() {
 
 void TestArraySequenceReduce() {
     int data[] = {1, 2, 3, 4};
-    ArraySequence<int> seq(data, 4);
+    MutableArraySequence<int> seq(data, 4);
 
     int sumResult = seq.Reduce(Sum, 0);
     int mulResult = seq.Reduce(Multiply, 1);
@@ -94,7 +95,7 @@ void TestArraySequenceReduce() {
 
 inline void TestListSequence() {
     int data[] = {1, 2, 3};
-    ListSequence<int> seq(data, 3);
+    MutableListSequence<int> seq(data, 3);
     seq.Append(4)->Prepend(0)->InsertAt(99, 2);
     assert(seq.GetFirst() == 0);
     assert(seq.Get(2) == 99);
@@ -109,7 +110,7 @@ inline void TestListSequence() {
 inline void TestListSequenceMap() {
     int data[] = {1, 2, 3};
 
-    ListSequence<int> seq(data, 3);
+    MutableListSequence<int> seq(data, 3);
     Sequence<int>* mapped = seq.Map(Double);
 
     assert(mapped->GetLength() == 3);
@@ -123,7 +124,7 @@ inline void TestListSequenceMap() {
 inline void TestListSequenceFrom() {
     int data[] = {1, 2, 3};
 
-    ListSequence<int> seq = ListSequence<int>::From(data, 3);
+    MutableListSequence<int> seq = MutableListSequence<int>::From(data, 3);
 
     assert(seq.GetLength() == 3);
     assert(seq.Get(0) == 1);
@@ -133,7 +134,7 @@ inline void TestListSequenceFrom() {
 
 void TestListSequenceReduce() {
     int data[] = {1, 2, 3, 4};
-    ListSequence<int> seq(data, 4);
+    MutableListSequence<int> seq(data, 4);
 
     int sumResult = seq.Reduce(Sum, 0);
     int mulResult = seq.Reduce(Multiply, 1);
@@ -146,8 +147,8 @@ inline void TestConcat() {
     int a[] = {1, 2};
     int b[] = {3, 4};
 
-    ArraySequence<int> seq1(a, 2);
-    ListSequence<int> seq2(b, 2);
+    MutableArraySequence<int> seq1(a, 2);
+    ImmutableListSequence<int> seq2(b, 2);
 
     Sequence<int>* joined = seq1 + seq2;
     assert(joined->GetLength() == 4);
@@ -161,7 +162,7 @@ inline void TestConcat() {
 
 inline void TestClone() {
     int data[] = {1, 2, 3};
-    ArraySequence<int> seq(data, 3);
+    MutableArraySequence<int> seq(data, 3);
 
     Sequence<int>* copy = seq.Clone();
 
@@ -229,9 +230,84 @@ inline void TestImmutableArraySequenceMapReduce() {
     delete joined;
 }
 
+inline void TestImmutableListSequence() {
+    int data[] = {1, 2, 3};
+    ImmutableListSequence<int> original(data, 3);
+
+    Sequence<int>* appended = original.Append(4);
+    Sequence<int>* prepended = original.Prepend(0);
+    Sequence<int>* inserted = original.InsertAt(99, 1);
+
+    assert(original.GetLength() == 3);
+    assert(original.Get(0) == 1);
+    assert(original.Get(1) == 2);
+    assert(original.Get(2) == 3);
+
+    assert(appended->GetLength() == 4);
+    assert(appended->GetLast() == 4);
+
+    assert(prepended->GetLength() == 4);
+    assert(prepended->GetFirst() == 0);
+
+    assert(inserted->GetLength() == 4);
+    assert(inserted->Get(1) == 99);
+    assert(inserted->Get(2) == 2);
+
+    delete appended;
+    delete prepended;
+    delete inserted;
+}
+
+inline void TestImmutableListSequenceMapReduce() {
+    int data[] = {1, 2, 3, 4};
+    ImmutableListSequence<int> seq(data, 4);
+
+    Sequence<int>* mapped = seq.Map(Double);
+    Sequence<int>* sub = seq.GetSubsequence(1, 2);
+    Sequence<int>* joined = seq + *sub;
+
+    assert(mapped->GetLength() == 4);
+    assert(mapped->Get(0) == 2);
+    assert(mapped->Get(3) == 8);
+
+    assert(sub->GetLength() == 2);
+    assert(sub->Get(0) == 2);
+    assert(sub->Get(1) == 3);
+
+    assert(joined->GetLength() == 6);
+    assert(joined->Get(4) == 2);
+    assert(joined->Get(5) == 3);
+
+    assert(seq.Reduce(Sum, 0) == 10);
+    assert(seq.Reduce(Multiply, 1) == 24);
+
+    delete mapped;
+    delete sub;
+    delete joined;
+}
+
+inline void TestMutableVsImmutableListDifference() {
+    int data[] = {1, 2, 3};
+    MutableListSequence<int> mutableSeq(data, 3);
+    ImmutableListSequence<int> immutableSeq(data, 3);
+
+    mutableSeq.Append(10);
+    Sequence<int>* immutableResult = immutableSeq.Append(10);
+
+    assert(mutableSeq.GetLength() == 4);
+    assert(mutableSeq.GetLast() == 10);
+
+    assert(immutableSeq.GetLength() == 3);
+    assert(immutableSeq.GetLast() == 3);
+    assert(immutableResult->GetLength() == 4);
+    assert(immutableResult->GetLast() == 10);
+
+    delete immutableResult;
+}
+
 inline void TestMutableVsImmutableDifference() {
     int data[] = {1, 2, 3};
-    ArraySequence<int> mutableSeq(data, 3);
+    MutableArraySequence<int> mutableSeq(data, 3);
     ImmutableArraySequence<int> immutableSeq(data, 3);
 
     mutableSeq.Append(10);
@@ -263,6 +339,9 @@ inline void RunAllTests() {
     TestClone();
     TestImmutableArraySequence();
     TestImmutableArraySequenceMapReduce();
+    TestImmutableListSequence();
+    TestImmutableListSequenceMapReduce();
     TestMutableVsImmutableDifference();
+    TestMutableVsImmutableListDifference();
     std::cout << "All tests passed!\n";
 }
