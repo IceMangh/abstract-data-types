@@ -5,44 +5,60 @@
 template <class T>
 class DynamicArray {
 private:
-    T* data_;
-    int size_;
+    T* data;
+    int size;
+    int capacity;
+
+    void Reserve(int newCapacity) {
+        if (newCapacity <= capacity) {
+            return;
+        }
+
+        T* newData = new T[newCapacity]{};
+        for (int i = 0; i < size; ++i) {
+            newData[i] = data[i];
+        }
+
+        delete[] data;
+        data = newData;
+        capacity = newCapacity;
+    }
 
     void CheckIndex(int index) const {
-        if (index < 0 || index >= size_) {
+        if (index < 0 || index >= size) {
             throw IndexOutOfRange();
         }
     }
 
 public:
-    DynamicArray() : data_(nullptr), size_(0) {}
+    DynamicArray() : data(nullptr), size(0), capacity(0) {}
 
-    explicit DynamicArray(int size) : data_(nullptr), size_(size) {
+    explicit DynamicArray(int size) : data(nullptr), size(size), capacity(size) {
         if (size < 0) {
             throw std::invalid_argument("Negative size");
         }
-        if (size_ > 0) {
-            data_ = new T[size_]{};
+        if (this->size > 0) {
+            data = new T[this->size]{};
         }
     }
 
-    DynamicArray(const T* items, int count) : data_(nullptr), size_(count) {
+    DynamicArray(const T* items, int count) : data(nullptr), size(count), capacity(count) {
         if (count < 0) {
             throw std::invalid_argument("Negative size");
         }
-        if (size_ > 0) {
-            data_ = new T[size_];
-            for (int i = 0; i < size_; ++i) {
-                data_[i] = items[i];
+        if (size > 0) {
+            data = new T[size];
+            for (int i = 0; i < size; ++i) {
+                data[i] = items[i];
             }
         }
     }
 
-    DynamicArray(const DynamicArray<T>& other) : data_(nullptr), size_(other.size_) {
-        if (size_ > 0) {
-            data_ = new T[size_];
-            for (int i = 0; i < size_; ++i) {
-                data_[i] = other.data_[i];
+    DynamicArray(const DynamicArray<T>& other) : data(nullptr), size(other.size), capacity(other.capacity) {
+        if (size > 0) {
+            data = new T[capacity]{};
+            for (int i = 0; i < size; ++i) {
+                data[i] = other.data[i];
             }
         }
     }
@@ -50,36 +66,37 @@ public:
     DynamicArray<T>& operator=(const DynamicArray<T>& other) {
         if (this != &other) {
             T* newData = nullptr;
-            if (other.size_ > 0) {
-                newData = new T[other.size_];
-                for (int i = 0; i < other.size_; ++i) {
-                    newData[i] = other.data_[i];
+            if (other.capacity > 0) {
+                newData = new T[other.capacity]{};
+                for (int i = 0; i < other.size; ++i) {
+                    newData[i] = other.data[i];
                 }
             }
-            delete[] data_;
-            data_ = newData;
-            size_ = other.size_;
+            delete[] data;
+            data = newData;
+            size = other.size;
+            capacity = other.capacity;
         }
         return *this;
     }
 
     ~DynamicArray() {
-        delete[] data_;
+        delete[] data;
     }
 
     const T& Get(int index) const {
         CheckIndex(index);
-        return data_[index];
+        return data[index];
     }
 
 
     int GetSize() const {
-        return size_;
+        return size;
     }
 
     void Set(int index, const T& value) {
         CheckIndex(index);
-        data_[index] = value;
+        data[index] = value;
     }
 
     void Resize(int newSize) {
@@ -87,25 +104,43 @@ public:
             throw std::invalid_argument("Negative size");
         }
 
+        if (newSize == size) {
+            return;
+        }
+
+        if (newSize > size) {
+            if (newSize > capacity) {
+                int newCapacity = (capacity == 0) ? 1 : capacity;
+                while (newCapacity < newSize) {
+                    newCapacity *= 2;
+                }
+                Reserve(newCapacity);
+            }
+
+            for (int i = size; i < newSize; ++i) {
+                data[i] = T{};
+            }
+            size = newSize;
+            return;
+        }
+
         T* newData = nullptr;
         if (newSize > 0) {
             newData = new T[newSize]{};
-            int copySize = (newSize < size_) ? newSize : size_;
-            for (int i = 0; i < copySize; ++i) {
-                newData[i] = data_[i];
+            for (int i = 0; i < newSize; ++i) {
+                newData[i] = data[i];
             }
         }
 
-        delete[] data_;
-        data_ = newData;
-        size_ = newSize;
+        delete[] data;
+        data = newData;
+        size = newSize;
+        capacity = newSize;
     }
 
     T& operator[](int index) {
         CheckIndex(index);
-        return data_[index];
+        return data[index];
     }
 
 };
-
-

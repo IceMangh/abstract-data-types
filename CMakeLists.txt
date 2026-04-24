@@ -9,7 +9,9 @@ add_executable(atd main.cpp
         DynamicArray.h
         Exceptions.h
         ImmutableArraySequence.h
+        ImmutableListSequence.h
         LinkedList.h
+        ListSequenceBase.h
         ListSequence.h
         Sequence.h
         Tests.h

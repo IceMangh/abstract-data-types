@@ -11,25 +11,25 @@ private:
         Node(const T& data, Node* next = nullptr) : data(data), next(next) {}
     };
 
-    Node* head_;
-    Node* tail_;
-    int length_;
+    Node* head;
+    Node* tail;
+    int length;
 
     Node* GetNode(int index) const {
-        if (index < 0 || index >= length_) {
+        if (index < 0 || index >= length) {
             throw IndexOutOfRange();
         }
-        Node* cur = head_;
+        Node* current = head;
         for (int i = 0; i < index; ++i) {
-            cur = cur->next;
+            current = current->next;
         }
-        return cur;
+        return current;
     }
 
 public:
-    LinkedList() : head_(nullptr), tail_(nullptr), length_(0) {}
+    LinkedList() : head(nullptr), tail(nullptr), length(0) {}
 
-    LinkedList(const T* items, int count) : head_(nullptr), tail_(nullptr), length_(0) {
+    LinkedList(const T* items, int count) : head(nullptr), tail(nullptr), length(0) {
         if (count < 0) {
             throw std::invalid_argument("Negative count");
         }
@@ -38,21 +38,21 @@ public:
         }
     }
 
-    LinkedList(const LinkedList<T>& other) : head_(nullptr), tail_(nullptr), length_(0) {
-        Node* cur = other.head_;
-        while (cur != nullptr) {
-            Append(cur->data);
-            cur = cur->next;
+    LinkedList(const LinkedList<T>& other) : head(nullptr), tail(nullptr), length(0) {
+        Node* current = other.head;
+        while (current != nullptr) {
+            Append(current->data);
+            current = current->next;
         }
     }
 
     LinkedList<T>& operator=(const LinkedList<T>& other) {
         if (this != &other) {
             Clear();
-            Node* cur = other.head_;
-            while (cur != nullptr) {
-                Append(cur->data);
-                cur = cur->next;
+            Node* current = other.head;
+            while (current != nullptr) {
+                Append(current->data);
+                current = current->next;
             }
         }
         return *this;
@@ -63,29 +63,29 @@ public:
     }
 
     void Clear() {
-        Node* cur = head_;
-        while (cur != nullptr) {
-            Node* next = cur->next;
-            delete cur;
-            cur = next;
+        Node* current = head;
+        while (current != nullptr) {
+            Node* next = current->next;
+            delete current;
+            current = next;
         }
-        head_ = nullptr;
-        tail_ = nullptr;
-        length_ = 0;
+        head = nullptr;
+        tail = nullptr;
+        length = 0;
     }
 
     const T& GetFirst() const {
-        if (length_ == 0) {
+        if (length == 0) {
             throw IndexOutOfRange();
         }
-        return head_->data;
+        return head->data;
     }
 
     const T& GetLast() const {
-        if (length_ == 0) {
+        if (length == 0) {
             throw IndexOutOfRange();
         }
-        return tail_->data;
+        return tail->data;
     }
 
     const T& Get(int index) const {
@@ -94,11 +94,11 @@ public:
 
 
     int GetLength() const {
-        return length_;
+        return length;
     }
 
     LinkedList<T>* GetSubList(int startIndex, int endIndex) const {
-        if (startIndex < 0 || endIndex < 0 || startIndex >= length_ || endIndex >= length_ || startIndex > endIndex) {
+        if (startIndex < 0 || endIndex < 0 || startIndex >= length || endIndex >= length || startIndex > endIndex) {
             throw IndexOutOfRange();
         }
         LinkedList<T>* result = new LinkedList<T>();
@@ -110,39 +110,39 @@ public:
 
     void Append(const T& item) {
         Node* node = new Node(item);
-        if (length_ == 0) {
-            head_ = tail_ = node;
+        if (length == 0) {
+            head = tail = node;
         } else {
-            tail_->next = node;
-            tail_ = node;
+            tail->next = node;
+            tail = node;
         }
-        ++length_;
+        ++length;
     }
 
     void Prepend(const T& item) {
-        Node* node = new Node(item, head_);
-        head_ = node;
-        if (length_ == 0) {
-            tail_ = node;
+        Node* node = new Node(item, head);
+        head = node;
+        if (length == 0) {
+            tail = node;
         }
-        ++length_;
+        ++length;
     }
 
     void InsertAt(const T& item, int index) {
-        if (index < 0 || index > length_) {
+        if (index < 0 || index > length) {
             throw IndexOutOfRange();
         }
         if (index == 0) {
             Prepend(item);
             return;
         }
-        if (index == length_) {
+        if (index == length) {
             Append(item);
             return;
         }
         Node* prev = GetNode(index - 1);
         prev->next = new Node(item, prev->next);
-        ++length_;
+        ++length;
     }
 
     LinkedList<T>* Concat(const LinkedList<T>* other) const {
@@ -153,15 +153,15 @@ public:
         return result;
     }
 
-    T& operator[](int index){
-        if (index < 0 || index >= length_) {
+    T& operator[](int index) {
+        if (index < 0 || index >= length) {
             throw IndexOutOfRange();
         }
-        Node* cur = head_;
+        Node* current = head;
         for (int i = 0; i < index; ++i) {
-            cur = cur->next;
+            current = current->next;
         }
-        return cur->data;
+        return current->data;
     }
 
 };
