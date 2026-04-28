@@ -1,6 +1,7 @@
 #pragma once
 #include <stdexcept>
 #include "Exceptions.h"
+#include "IEnumerator.h"
 
 template <class T>
 class LinkedList {
@@ -27,6 +28,26 @@ private:
     }
 
 public:
+    class Enumerator : public IEnumerator<T> {
+    private:
+        Node* current;
+        Node* next;
+    public:
+        explicit Enumerator(Node* head) : current(nullptr), next(head) {}
+
+        bool MoveNext() override {
+            current = next;
+            if (next != nullptr) {
+                next = next->next;
+            }
+            return current != nullptr;
+        }
+
+        T Current() const override {
+            return current->data;
+        }
+    };
+
     LinkedList() : head(nullptr), tail(nullptr), length(0) {}
 
     LinkedList(const T* items, int count) : head(nullptr), tail(nullptr), length(0) {
@@ -92,18 +113,21 @@ public:
         return GetNode(index)->data;
     }
 
-
     int GetLength() const {
         return length;
     }
 
     LinkedList<T>* GetSubList(int startIndex, int endIndex) const {
-        if (startIndex < 0 || endIndex < 0 || startIndex >= length || endIndex >= length || startIndex > endIndex) {
+        if (startIndex < 0 || endIndex < 0 ||
+            startIndex >= length || endIndex >= length ||
+            startIndex > endIndex) {
             throw IndexOutOfRange();
         }
         LinkedList<T>* result = new LinkedList<T>();
+        Node* current = GetNode(startIndex);
         for (int i = startIndex; i <= endIndex; ++i) {
-            result->Append(Get(i));
+            result->Append(current->data);
+            current = current->next;
         }
         return result;
     }
@@ -147,10 +171,16 @@ public:
 
     LinkedList<T>* Concat(const LinkedList<T>* other) const {
         LinkedList<T>* result = new LinkedList<T>(*this);
-        for (int i = 0; i < other->GetLength(); ++i) {
-            result->Append(other->Get(i));
+        Node* current = other->head;
+        while (current != nullptr) {
+            result->Append(current->data);
+            current = current->next;
         }
         return result;
+    }
+
+    IEnumerator<T>* GetEnumerator() const {
+        return new Enumerator(head);
     }
 
     T& operator[](int index) {
@@ -163,5 +193,4 @@ public:
         }
         return current->data;
     }
-
 };

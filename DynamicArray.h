@@ -1,6 +1,7 @@
 #pragma once
 #include <stdexcept>
 #include "Exceptions.h"
+#include "IEnumerator.h"
 
 template <class T>
 class DynamicArray {
@@ -31,6 +32,27 @@ private:
     }
 
 public:
+    class Enumerator : public IEnumerator<T> {
+    private:
+        const T* items;
+        int length;
+        int index;
+
+    public:
+        Enumerator(const T* items, int length) : items(items), length(length), index(-1) {}
+
+        bool MoveNext() override {
+            if (index < length) {
+                ++index;
+            }
+            return index < length;
+        }
+
+        T Current() const override {
+            return items[index];
+        }
+    };
+
     DynamicArray() : data(nullptr), size(0), capacity(0) {}
 
     explicit DynamicArray(int size) : data(nullptr), size(size), capacity(size) {
@@ -90,8 +112,12 @@ public:
     }
 
 
-    int GetSize() const {
+    int GetLength() const {
         return size;
+    }
+
+    IEnumerator<T>* GetEnumerator() const {
+        return new Enumerator(data, size);
     }
 
     void Set(int index, const T& value) {

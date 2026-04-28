@@ -3,7 +3,7 @@ project(atd)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(atd main.cpp
+add_executable(atd main.cpp Tests.cpp
         ArraySequenceBase.h
         DynamicArray.h
         Exceptions.h
@@ -15,6 +15,5 @@ add_executable(atd main.cpp
         Tests.h
         IEnumerator.h
         IEnumerable.h
-        SequenceEnumerator.h
         ICollection.h
 )

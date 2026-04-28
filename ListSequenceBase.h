@@ -3,7 +3,6 @@
 #include <memory>
 #include "LinkedList.h"
 #include "Sequence.h"
-#include "SequenceEnumerator.h"
 
 template <class T>
 class ListSequenceBase : public Sequence<T> {
@@ -62,15 +61,22 @@ public:
         }
 
         std::unique_ptr<Sequence<T>> result(this->CreateEmpty());
-        for (int i = startIndex; i <= endIndex; ++i) {
-            this->AppendToResult(result, items.Get(i));
+        std::unique_ptr<IEnumerator<T>> enumerator(items.GetEnumerator());
+
+        int i = -1;
+        while (enumerator->MoveNext()) {
+            ++i;
+            if (i > endIndex) break;
+            if (i >= startIndex) {
+                this->AppendToResult(result, enumerator->Current());
+            }
         }
 
         return result.release();
     }
 
     IEnumerator<T>* GetEnumerator() const override {
-        return new SequenceEnumerator<T>(*this);
+        return items.GetEnumerator();
     }
 
     Sequence<T>* Append(const T& item) override {
